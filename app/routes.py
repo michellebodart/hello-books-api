@@ -1,8 +1,10 @@
 from app import db
 from app.models.book import Book
+from app.models.author import Author
 from flask import Blueprint, jsonify, request, make_response
 
-books_bp = Blueprint("books", __name__, url_prefix="/books")
+books_bp = Blueprint("books", __name__, url_prefix="books")
+authors_bp = Blueprint("authors", __name__, url_prefix="authors")
 
 @books_bp.route("", methods=["GET", "POST"], strict_slashes=False)
 def handle_books():
@@ -61,18 +63,16 @@ def handle_book(book_id):
         db.session.commit()
         return make_response(f"Book #{book.id} successfully deleted")
 
-# @books_bp.route("/book_title", methods=["GET"], strict_slashes=False)
-# def get_books(book_title):
-#     book_title = str(book_title)
-#     books = Book.query.filter_by(title=book_title)
-#     response = []
-#     for book in books:
-#         response.append({
-#             "id": book.id,
-#             "title": book.title,
-#             "description": book.description
-#         })
-#     return jsonify(response)
+@authors_bp.route("", methods=["GET","POST"], strict_slashes=False)
+def handle_authors():
+    if request.method == "POST":
+        request_body = request.get_json()
+        new_author = Author(name=request_body["name"])
+
+        db.session.add(new_author)
+        db.session.commit()
+
+        return make_response(f"Book {new_book.title} successfully created", 201)
 
         
 
