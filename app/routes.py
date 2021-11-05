@@ -1,10 +1,14 @@
 from app import db
 from app.models.book import Book
 from app.models.author import Author
+from app.models.genre import Genre
 from flask import Blueprint, jsonify, request, make_response
 
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 authors_bp = Blueprint("authors", __name__, url_prefix="/authors")
+genres_bp = Blueprint("genres", __name__, url_prefix="/genres")
+
+# BOOKS
 
 @books_bp.route("", methods=["GET", "POST"], strict_slashes=False)
 def handle_books():
@@ -63,6 +67,8 @@ def handle_book(book_id):
         db.session.commit()
         return make_response(f"Book #{book.id} successfully deleted")
 
+# AUTHORS
+
 @authors_bp.route("", methods=["GET", "POST"], strict_slashes=False)
 def handle_authors():
     if request.method == "GET":
@@ -82,6 +88,8 @@ def handle_authors():
         db.session.commit()
 
         return make_response(f"Author {new_author.name} successfully created", 201)
+
+# AUTHORS x BOOKS
 
 @authors_bp.route("/<author_id>/books", methods=["GET", "POST"], strict_slashes=False)
 def handle_authors_books(author_id):
@@ -106,6 +114,16 @@ def handle_authors_books(author_id):
             })
         return jsonify(books_response)
 
+# GENRES
 
-        
-
+@genres_bp.route("", methods=["GET", "POST"], strict_slashes=False)
+def handle_genres():
+    if request.method == "POST":
+        request_body = request.get_json()
+        new_genre = Genre(name=request_body["name"])
+        db.session.add(new_genre)
+        db.session.commit()
+        return new_genre.to_dict(), 201
+    elif request.method == "GET":
+        genres = Genre.query.all()
+        return jsonify([genre.to_dict() for genre in genres])
